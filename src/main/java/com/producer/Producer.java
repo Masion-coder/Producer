@@ -36,7 +36,7 @@ public class Producer implements Runnable {
         public void run() {
             try (Socket s = new Socket("127.0.0.1", m_port);
                     BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(s.getOutputStream(), "UTF-16LE"))) {
-                // s.setSoTimeout(2000);
+
                 // System.out.println("开始发送素数");
                 bw.write(MAPPER.writeValueAsString(m_data));
                 bw.flush();
@@ -44,6 +44,12 @@ public class Producer implements Runnable {
 
             } catch (UnknownHostException e) {
                 System.out.println("ERROE1:" + e.getMessage());
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
             } catch (IOException e) {
                 System.out.println("ERROE2:" + e.getMessage());
                 m_n += m_data.data.size();
@@ -62,6 +68,7 @@ public class Producer implements Runnable {
     @Override
     public void run() {
         Random random = new Random();
+        int n = m_n;
         while (m_n > 0) {
             if (m_buffer.size() < m_n)
             m_buffer.add(random.nextInt(2000000000) + (long) 2000000000);
@@ -84,6 +91,12 @@ public class Producer implements Runnable {
                     e.printStackTrace();
                 }
             }
+            if (n-m_n > 1000) {
+                System.out.println(m_n);
+                n = m_n;
+            }
         }
+        m_pool.shutdown();
+        System.out.println("finish");
     }
 }
